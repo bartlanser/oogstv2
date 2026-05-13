@@ -12,71 +12,152 @@
     .wolk { position:absolute; border-radius:50%; background:rgba(255,255,255,0.45); filter:blur(40px); }
     .grond { position:fixed; bottom:0; left:0; right:0; height:90px; background:linear-gradient(to top,#C8B89A,#D9CAB4); border-radius:40% 40% 0 0 / 20px 20px 0 0; z-index:5; }
     .grond::before { content:""; position:absolute; top:-13px; left:0; right:0; height:26px; background:linear-gradient(to top,#7DAA6A,#9DC47D); border-radius:50% 50% 0 0 / 100% 100% 0 0; }
+
+    /* Tuin — standaard verborgen totdat docent onthult */
     .tuin { position:fixed; bottom:90px; left:0; right:0; top:80px; z-index:3; }
     .tuin.verborgen { filter:blur(18px) brightness(1.05); pointer-events:none; }
     .tuin.verborgen .tuin-bloem { opacity:0.15; }
+
     .titel-hoek { position:fixed; top:1.5rem; left:2.5rem; z-index:10; display:flex; align-items:baseline; gap:1.2rem; }
     .titel-hoek h1 { font-family:'Fraunces',serif; font-weight:900; font-size:2.5rem; letter-spacing:-0.03em; color:#2C2416; opacity:0.18; }
     .inzendingen-teller { font-family:'Fraunces',serif; font-style:italic; font-weight:300; font-size:0.9rem; color:#9A8870; }
+
+    /* Knoppen rechtsboven */
     .knoppen-balk { position:fixed; top:1.2rem; right:1.5rem; z-index:20; display:flex; gap:0.6rem; align-items:center; }
-    .onthul-knop { background:#2C2416; color:#FAF6EF; font-family:'Fraunces',serif; font-style:italic; font-weight:300; font-size:1rem; padding:0.5rem 1.4rem; border:none; border-radius:100px; cursor:pointer; transition:background 0.2s,transform 0.2s; }
+
+    .onthul-knop {
+      background:#2C2416;
+      color:#FAF6EF;
+      font-family:'Fraunces',serif;
+      font-style:italic;
+      font-weight:300;
+      font-size:1rem;
+      padding:0.5rem 1.4rem;
+      border:none;
+      border-radius:100px;
+      cursor:pointer;
+      transition:background 0.2s, transform 0.2s;
+    }
     .onthul-knop:hover { background:#D4744A; transform:scale(1.03); }
-    .onthul-knop.zichtbaar-staat { background:transparent; color:#A09080; border:1.5px solid #C8BAA8; font-family:'DM Sans',sans-serif; font-style:normal; font-size:0.75rem; }
+    .onthul-knop.zichtbaar-staat {
+      background:transparent;
+      color:#A09080;
+      border:1.5px solid #C8BAA8;
+      font-family:'DM Sans',sans-serif;
+      font-style:normal;
+      font-size:0.75rem;
+    }
     .onthul-knop.zichtbaar-staat:hover { background:#2C2416; color:#FAF6EF; border-color:#2C2416; }
+
     .reset-knop { background:transparent; border:1.5px solid #C8BAA8; color:#A09080; font-family:'DM Sans',sans-serif; font-size:0.75rem; padding:0.4rem 0.9rem; border-radius:100px; cursor:pointer; transition:background 0.2s,color 0.2s; }
     .reset-knop:hover { background:#2C2416; color:#FAF6EF; border-color:#2C2416; }
-    .wacht-overlay { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:12; text-align:center; pointer-events:none; transition:opacity 0.6s; }
+
+    /* Wacht-overlay — zichtbaar als tuin verborgen is en er al inzendingen zijn */
+    .wacht-overlay {
+      position:fixed;
+      top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      z-index:12;
+      text-align:center;
+      pointer-events:none;
+      transition:opacity 0.6s ease;
+    }
     .wacht-overlay.verborgen { opacity:0; }
     .wacht-overlay h2 { font-family:'Fraunces',serif; font-weight:700; font-size:2rem; color:#2C2416; opacity:0.5; margin-bottom:0.4rem; }
     .wacht-overlay p { font-size:0.9rem; color:#B8A898; }
+
+    /* Leeg bericht */
     .leeg-bericht { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; z-index:15; pointer-events:none; transition:opacity 0.8s; }
-    .leeg-bericht.verborgen { opacity:0; }
-    .leeg-bericht .groot-svg { width:80px; height:90px; margin:0 auto 1rem; overflow:hidden; }
+    .leeg-bericht.verborgen { opacity:0; pointer-events:none; }
+    .leeg-bericht .groot-svg { width:80px; height:90px; margin:0 auto 1rem; }
+    .leeg-bericht .groot-svg svg { width:100%; height:100%; }
     .leeg-bericht h2 { font-family:'Fraunces',serif; font-weight:700; font-size:1.5rem; color:#A09080; margin-bottom:0.5rem; }
     .leeg-bericht p { font-size:0.9rem; color:#B8A898; }
 
     /* Bloem in de tuin */
-    .tuin-bloem { position:absolute; bottom:0; display:flex; flex-direction:column; align-items:center; transform-origin:bottom center; animation:groei-in 0.8s cubic-bezier(0.34,1.56,0.64,1) both; cursor:default; }
+    .tuin-bloem {
+      position:absolute; bottom:0;
+      display:flex; flex-direction:column; align-items:center;
+      transform-origin:bottom center;
+      animation:groei-in 0.8s cubic-bezier(0.34,1.56,0.64,1) both;
+      cursor:default;
+    }
     @keyframes groei-in { from{transform:scaleY(0);opacity:0} to{transform:scaleY(1);opacity:1} }
     .tuin-bloem:nth-child(odd)  { animation:groei-in 0.8s cubic-bezier(0.34,1.56,0.64,1) both, wiebel 4s ease-in-out infinite 1s; }
     .tuin-bloem:nth-child(even) { animation:groei-in 0.8s cubic-bezier(0.34,1.56,0.64,1) both, wiebel 5s ease-in-out infinite 2s; }
     @keyframes wiebel { 0%,100%{transform:rotate(0)} 25%{transform:rotate(1.5deg)} 75%{transform:rotate(-1.5deg)} }
-    .tuin-bloem-svg { display:block; overflow:hidden; }
+    .tuin-bloem-svg { display:block; }
+    .tuin-bloem-svg svg { width:100%; height:100%; }
 
-    /* Hover label */
-    .bloem-label { position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%) translateY(4px); background:#2C2416; color:#FAF6EF; font-family:'DM Sans',sans-serif; font-size:0.7rem; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; padding:0.3rem 0.7rem; border-radius:100px; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity 0.15s ease,transform 0.15s ease; }
-    .tuin-bloem:hover .bloem-label { opacity:1; transform:translateX(-50%) translateY(0); }
-    .bloem-label::after { content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:#2C2416; }
+    /* Hover-label */
+    .bloem-label {
+      position:absolute;
+      bottom:calc(100% + 8px);
+      left:50%;
+      transform:translateX(-50%);
+      background:#2C2416;
+      color:#FAF6EF;
+      font-family:'DM Sans',sans-serif;
+      font-size:0.7rem;
+      font-weight:600;
+      letter-spacing:0.07em;
+      text-transform:uppercase;
+      padding:0.3rem 0.7rem;
+      border-radius:100px;
+      white-space:nowrap;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity 0.15s ease, transform 0.15s ease;
+      transform:translateX(-50%) translateY(4px);
+    }
+    .tuin-bloem:hover .bloem-label {
+      opacity:1;
+      transform:translateX(-50%) translateY(0);
+    }
+    /* Pijltje onderaan het label */
+    .bloem-label::after {
+      content:"";
+      position:absolute;
+      top:100%; left:50%;
+      transform:translateX(-50%);
+      border:5px solid transparent;
+      border-top-color:#2C2416;
+    }
   </style>
 </head>
 <body>
+
 <div class="hemel">
   <div class="wolk" style="width:300px;height:200px;top:5%;left:10%"></div>
   <div class="wolk" style="width:200px;height:150px;top:15%;right:15%"></div>
   <div class="wolk" style="width:250px;height:180px;top:8%;left:50%"></div>
 </div>
 <div class="grond"></div>
+
 <div class="titel-hoek">
   <h1>OOGST</h1>
   <span class="inzendingen-teller" id="inzendingen-teller">verbinden…</span>
 </div>
+
+<!-- Knoppen rechtsboven -->
 <div class="knoppen-balk">
   <button class="onthul-knop" id="onthul-knop" onclick="toggleTuin()">Toon tuin</button>
   <button class="reset-knop" onclick="resetTuin()">↺ Nieuwe les</button>
 </div>
+
+<!-- Leeg bericht (geen inzendingen) -->
 <div class="leeg-bericht" id="leeg-bericht">
-  <div class="groot-svg">
-    <svg viewBox="28 255 115 155" xmlns="http://www.w3.org/2000/svg" width="80" height="90">
-      <image href="bloemen.svg" x="0" y="0" width="612" height="760"/>
-    </svg>
-  </div>
+  <div class="groot-svg" id="leeg-icoon"></div>
   <h2>De tuin is nog leeg</h2>
   <p>Leerlingen kunnen nu hun boeket insturen via leerling.html</p>
 </div>
+
+<!-- Wacht-overlay (inzendingen binnen maar nog verborgen) -->
 <div class="wacht-overlay verborgen" id="wacht-overlay">
   <h2>Leerlingen zijn aan het insturen…</h2>
   <p>Klik "Toon tuin" als iedereen klaar is</p>
 </div>
+
 <div class="tuin verborgen" id="tuin"></div>
 
 <script type="module">
@@ -96,87 +177,227 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  const SVG_SRC = "bloemen.svg";
+  // Of de tuin al onthuld is
+  let tuinZichtbaar = false;
+  // Laatste ontvangen boeketten opslaan zodat we kunnen hertekenen
+  let huidigeBoekettenCache = [];
 
-  const BLOEMEN_DATA = {
-    blijdschap:    { naam:"Blijdschap",    vb:"28 80 105 155",   x:8  },
-    enthousiasme:  { naam:"Enthousiasme",  vb:"198 80 115 155",  x:16 },
-    trots:         { naam:"Trots",         vb:"368 50 115 160",  x:24 },
-    rust:          { naam:"Rust",          vb:"535 45 115 165",  x:32 },
-    opluchting:    { naam:"Opluchting",    vb:"28 255 115 155",  x:40 },
-    tevredenheid:  { naam:"Tevredenheid",  vb:"198 255 115 155", x:48 },
-    stress:        { naam:"Stress",        vb:"368 245 115 160", x:56 },
-    onzekerheid:   { naam:"Onzekerheid",   vb:"535 255 115 155", x:64 },
-    overweldiging: { naam:"Overweldiging", vb:"28 450 115 155",  x:72 },
-    verdriet:      { naam:"Verdriet",      vb:"198 440 115 155", x:80 },
-    eenzaamheid:   { naam:"Eenzaamheid",   vb:"368 445 115 155", x:88 },
-    boosheid:      { naam:"Boosheid",      vb:"535 445 115 155", x:95 },
+  const BLOEM_NAMEN = {
+    blijdschap:"Blijdschap", stress:"Stress", enthousiasme:"Enthousiasme",
+    onzekerheid:"Onzekerheid", trots:"Trots", overweldiging:"Overweldiging",
+    rust:"Rust", verdriet:"Verdriet", opluchting:"Opluchting",
+    eenzaamheid:"Eenzaamheid", tevredenheid:"Tevredenheid", boosheid:"Boosheid",
   };
 
-  const GROOTTE_BASIS = { blijdschap:110, enthousiasme:130, trots:120, rust:140, opluchting:125, tevredenheid:135, stress:105, onzekerheid:145, overweldiging:120, verdriet:150, eenzaamheid:108, boosheid:100 };
+  const BLOEM_SVG = {
+    blijdschap: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="38" cy="100" rx="7" ry="14" fill="#5A8A3A" transform="rotate(-30 38 100)"/>
+      <path d="M50,115 Q48,95 50,70" stroke="#5A8A3A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="50" cy="46" rx="8" ry="19" fill="#F5C030" transform="rotate(0 50 46)"/>
+      <ellipse cx="50" cy="46" rx="8" ry="19" fill="#F5C030" transform="rotate(30 50 46)"/>
+      <ellipse cx="50" cy="46" rx="8" ry="19" fill="#F5C030" transform="rotate(60 50 46)"/>
+      <ellipse cx="50" cy="46" rx="8" ry="19" fill="#F5C030" transform="rotate(90 50 46)"/>
+      <ellipse cx="50" cy="46" rx="8" ry="19" fill="#EBA820" transform="rotate(120 50 46)"/>
+      <ellipse cx="50" cy="46" rx="8" ry="19" fill="#EBA820" transform="rotate(150 50 46)"/>
+      <circle cx="50" cy="46" r="15" fill="#7B4A1E"/>
+      <circle cx="50" cy="46" r="8" fill="#4A2A08"/>
+    </svg>`,
+    stress: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q52,95 50,68" stroke="#5A8A3A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="37" cy="100" rx="6" ry="13" fill="#5A8A3A" transform="rotate(25 37 100)"/>
+      <polygon points="50,16 55,40 70,25 59,46 78,44 61,56 78,63 59,66 68,84 52,72 52,90 50,74 48,90 48,72 32,84 41,66 22,63 39,56 22,44 41,46 30,25 45,40" fill="#CC2828"/>
+      <polygon points="50,26 54,43 66,32 57,49 72,47 59,57 72,63 57,66 64,80 51,70 51,85 50,71 49,85 49,70 36,80 43,66 28,63 41,57 28,47 43,49 34,32 46,43" fill="#E84040"/>
+      <circle cx="50" cy="54" r="12" fill="#B81818"/>
+      <circle cx="50" cy="54" r="6" fill="#881010"/>
+    </svg>`,
+    enthousiasme: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q47,95 50,68" stroke="#5A8A3A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="64" cy="100" rx="6" ry="13" fill="#5A8A3A" transform="rotate(-25 64 100)"/>
+      <polygon points="50,12 56,34 71,18 60,40 80,36 64,50 82,56 63,60 74,76 56,68 56,88 50,71 44,88 44,68 26,76 37,60 18,56 36,50 20,36 40,40 29,18 44,34" fill="#F07020"/>
+      <polygon points="50,22 55,38 66,26 58,44 74,41 61,52 76,57 60,60 69,73 54,66 54,83 50,69 46,83 46,66 31,73 40,60 24,57 39,52 26,41 42,44 34,26 45,38" fill="#F8924A"/>
+      <circle cx="50" cy="52" r="13" fill="#E05510"/>
+      <circle cx="50" cy="52" r="6" fill="#B03A08"/>
+    </svg>`,
+    onzekerheid: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q50,96 50,76" stroke="#5A8A3A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="36" cy="101" rx="6" ry="13" fill="#5A8A3A" transform="rotate(20 36 101)"/>
+      <ellipse cx="50" cy="50" rx="11" ry="24" fill="#7AABBF"/>
+      <ellipse cx="43" cy="55" rx="6" ry="19" fill="#9ACCD8" opacity="0.6"/>
+      <ellipse cx="50" cy="30" rx="9" ry="12" fill="#5A9AB0"/>
+      <ellipse cx="57" cy="36" rx="5" ry="8" fill="#9ACCD8" opacity="0.5"/>
+    </svg>`,
+    trots: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q53,96 50,72" stroke="#5A8A3A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="64" cy="100" rx="6" ry="13" fill="#5A8A3A" transform="rotate(-20 64 100)"/>
+      <ellipse cx="50" cy="50" rx="21" ry="26" fill="#A060C0"/>
+      <ellipse cx="50" cy="50" rx="17" ry="21" fill="#B878D0"/>
+      <ellipse cx="41" cy="44" rx="12" ry="16" fill="#CC90E0" opacity="0.85"/>
+      <ellipse cx="59" cy="44" rx="12" ry="16" fill="#CC90E0" opacity="0.85"/>
+      <ellipse cx="50" cy="39" rx="10" ry="12" fill="#DCA8EC"/>
+      <circle cx="50" cy="52" r="7" fill="#7830A8"/>
+      <circle cx="50" cy="52" r="3" fill="#5010A0"/>
+    </svg>`,
+    overweldiging: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q48,96 50,72" stroke="#5A8A3A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="36" cy="100" rx="6" ry="13" fill="#5A8A3A" transform="rotate(25 36 100)"/>
+      <ellipse cx="50" cy="52" rx="7" ry="21" fill="#7840B8" transform="rotate(0 50 52)"/>
+      <ellipse cx="50" cy="52" rx="7" ry="21" fill="#8A52C8" transform="rotate(20 50 52)"/>
+      <ellipse cx="50" cy="52" rx="7" ry="21" fill="#7840B8" transform="rotate(40 50 52)"/>
+      <ellipse cx="50" cy="52" rx="7" ry="21" fill="#9A64D8" transform="rotate(60 50 52)"/>
+      <ellipse cx="50" cy="52" rx="7" ry="21" fill="#8A52C8" transform="rotate(80 50 52)"/>
+      <ellipse cx="50" cy="52" rx="7" ry="21" fill="#AA76E4" transform="rotate(100 50 52)"/>
+      <ellipse cx="50" cy="52" rx="7" ry="21" fill="#7840B8" transform="rotate(120 50 52)"/>
+      <ellipse cx="50" cy="52" rx="7" ry="21" fill="#9A64D8" transform="rotate(140 50 52)"/>
+      <ellipse cx="50" cy="52" rx="7" ry="21" fill="#8A52C8" transform="rotate(160 50 52)"/>
+      <circle cx="50" cy="52" r="10" fill="#5020A0"/>
+      <circle cx="50" cy="52" r="5" fill="#380A78"/>
+    </svg>`,
+    rust: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q53,96 50,72" stroke="#5A8A3A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="64" cy="100" rx="6" ry="13" fill="#5A8A3A" transform="rotate(-30 64 100)"/>
+      <ellipse cx="50" cy="34" rx="15" ry="20" fill="#7FC88A" opacity="0.95"/>
+      <ellipse cx="69" cy="52" rx="15" ry="20" fill="#6DB87A" opacity="0.95" transform="rotate(90 69 52)"/>
+      <ellipse cx="50" cy="70" rx="15" ry="20" fill="#7FC88A" opacity="0.95" transform="rotate(180 50 70)"/>
+      <ellipse cx="31" cy="52" rx="15" ry="20" fill="#6DB87A" opacity="0.95" transform="rotate(270 31 52)"/>
+      <circle cx="50" cy="52" r="10" fill="#3A7840"/>
+      <circle cx="50" cy="52" r="5" fill="#2A5C30"/>
+    </svg>`,
+    verdriet: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q43,97 45,76" stroke="#5A8A3A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="34" cy="103" rx="6" ry="12" fill="#5A8A3A" transform="rotate(15 34 103)"/>
+      <ellipse cx="45" cy="57" rx="10" ry="22" fill="#6090C0" transform="rotate(-18 45 57)"/>
+      <ellipse cx="45" cy="57" rx="10" ry="22" fill="#6090C0" transform="rotate(18 45 57)"/>
+      <ellipse cx="45" cy="57" rx="10" ry="22" fill="#7AAAD0" transform="rotate(44 45 57)"/>
+      <ellipse cx="45" cy="57" rx="10" ry="22" fill="#7AAAD0" transform="rotate(68 45 57)"/>
+      <ellipse cx="45" cy="57" rx="10" ry="22" fill="#8AB8D8" transform="rotate(-44 45 57)"/>
+      <ellipse cx="45" cy="57" rx="10" ry="22" fill="#8AB8D8" transform="rotate(-68 45 57)"/>
+      <circle cx="45" cy="57" r="10" fill="#4070A8"/>
+      <circle cx="45" cy="57" r="5" fill="#2A5080"/>
+    </svg>`,
+    opluchting: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q47,96 50,70" stroke="#5A8A3A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="36" cy="101" rx="6" ry="12" fill="#5A8A3A" transform="rotate(25 36 101)"/>
+      <ellipse cx="50" cy="50" rx="6" ry="23" fill="#F0D840" transform="rotate(0 50 50)"/>
+      <ellipse cx="50" cy="50" rx="6" ry="23" fill="#F4E060" transform="rotate(26 50 50)"/>
+      <ellipse cx="50" cy="50" rx="6" ry="23" fill="#F0D840" transform="rotate(52 50 50)"/>
+      <ellipse cx="50" cy="50" rx="6" ry="23" fill="#F4E060" transform="rotate(78 50 50)"/>
+      <ellipse cx="50" cy="50" rx="6" ry="23" fill="#F0D840" transform="rotate(104 50 50)"/>
+      <ellipse cx="50" cy="50" rx="6" ry="23" fill="#F4E060" transform="rotate(130 50 50)"/>
+      <ellipse cx="50" cy="50" rx="6" ry="23" fill="#F0D840" transform="rotate(156 50 50)"/>
+      <circle cx="50" cy="50" r="12" fill="#D4A820"/>
+      <circle cx="50" cy="50" r="6" fill="#A87010"/>
+    </svg>`,
+    eenzaamheid: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q54,97 52,76" stroke="#8A7050" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="64" cy="103" rx="6" ry="11" fill="#8A7050" transform="rotate(-20 64 103)"/>
+      <ellipse cx="52" cy="52" rx="8" ry="23" fill="#C09050" transform="rotate(-22 52 52)"/>
+      <ellipse cx="52" cy="52" rx="8" ry="23" fill="#B08040" transform="rotate(22 52 52)"/>
+      <ellipse cx="52" cy="52" rx="8" ry="23" fill="#C09050" transform="rotate(-52 52 52)"/>
+      <ellipse cx="52" cy="52" rx="8" ry="23" fill="#B08040" transform="rotate(52 52 52)"/>
+      <ellipse cx="52" cy="52" rx="8" ry="23" fill="#A87040" transform="rotate(82 52 52)"/>
+      <ellipse cx="52" cy="52" rx="8" ry="23" fill="#A87040" transform="rotate(-82 52 52)"/>
+      <circle cx="52" cy="52" r="11" fill="#8A5A28"/>
+      <circle cx="52" cy="52" r="5" fill="#6A4018"/>
+    </svg>`,
+    tevredenheid: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q53,96 50,72" stroke="#5A8A3A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="64" cy="100" rx="6" ry="13" fill="#5A8A3A" transform="rotate(-25 64 100)"/>
+      <ellipse cx="50" cy="52" rx="12" ry="23" fill="#5A9A5A" transform="rotate(0 50 52)"/>
+      <ellipse cx="50" cy="52" rx="12" ry="23" fill="#4A8A4A" transform="rotate(60 50 52)"/>
+      <ellipse cx="50" cy="52" rx="12" ry="23" fill="#5A9A5A" transform="rotate(120 50 52)"/>
+      <ellipse cx="50" cy="52" rx="12" ry="23" fill="#4A8A4A" transform="rotate(180 50 52)"/>
+      <ellipse cx="50" cy="52" rx="12" ry="23" fill="#6AAA6A" transform="rotate(240 50 52)"/>
+      <ellipse cx="50" cy="52" rx="12" ry="23" fill="#4A8A4A" transform="rotate(300 50 52)"/>
+      <circle cx="50" cy="52" r="10" fill="#2A6A2A"/>
+      <circle cx="50" cy="52" r="5" fill="#1A4A1A"/>
+    </svg>`,
+    boosheid: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q47,96 50,72" stroke="#4A7030" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <polygon points="42,106 35,98 44,96" fill="#4A7030"/>
+      <ellipse cx="64" cy="100" rx="6" ry="11" fill="#4A7030" transform="rotate(-25 64 100)"/>
+      <ellipse cx="50" cy="52" rx="19" ry="14" fill="#B82020"/>
+      <ellipse cx="42" cy="46" rx="14" ry="12" fill="#C83030" transform="rotate(-15 42 46)"/>
+      <ellipse cx="58" cy="46" rx="14" ry="12" fill="#C83030" transform="rotate(15 58 46)"/>
+      <ellipse cx="50" cy="39" rx="12" ry="10" fill="#D84040"/>
+      <ellipse cx="42" cy="35" rx="9" ry="8" fill="#E05050" transform="rotate(-10 42 35)"/>
+      <ellipse cx="58" cy="35" rx="9" ry="8" fill="#E05050" transform="rotate(10 58 35)"/>
+      <ellipse cx="50" cy="32" rx="7" ry="6" fill="#E86060"/>
+      <circle cx="50" cy="36" r="5" fill="#C01010"/>
+    </svg>`,
+  };
 
-  let tuinZichtbaar = false;
-  let cache = [];
+  const POSITIES = {
+    blijdschap:8, enthousiasme:16, trots:24, rust:32, opluchting:40, tevredenheid:48,
+    stress:56, onzekerheid:64, overweldiging:72, verdriet:80, eenzaamheid:88, boosheid:95,
+  };
+  const GROOTTE_BASIS = {
+    blijdschap:110, enthousiasme:130, trots:120, rust:140, opluchting:125, tevredenheid:135,
+    stress:105, onzekerheid:145, overweldiging:120, verdriet:150, eenzaamheid:108, boosheid:100,
+  };
 
-  function maakBloemSVG(vb, w, h) {
-    return `<svg viewBox="${vb}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${w}" height="${h}">
-      <image href="${SVG_SRC}" x="0" y="0" width="612" height="760"/>
-    </svg>`;
-  }
+  document.getElementById("leeg-icoon").innerHTML = BLOEM_SVG.rust;
 
   function tekenTuin(boeketten) {
     const tuin = document.getElementById("tuin");
-    const leeg = document.getElementById("leeg-bericht");
-    const wacht = document.getElementById("wacht-overlay");
+    const leegBericht = document.getElementById("leeg-bericht");
+    const wachtOverlay = document.getElementById("wacht-overlay");
     const teller = document.getElementById("inzendingen-teller");
-    const knop = document.getElementById("onthul-knop");
-    cache = boeketten;
+    const onthulKnop = document.getElementById("onthul-knop");
+
+    huidigeBoekettenCache = boeketten;
     tuin.innerHTML = "";
 
     if (!boeketten || boeketten.length === 0) {
-      leeg.classList.remove("verborgen");
-      wacht.classList.add("verborgen");
+      leegBericht.classList.remove("verborgen");
+      wachtOverlay.classList.add("verborgen");
       teller.textContent = "wachten op leerlingen…";
+      // Reset tuin naar verborgen staat bij nieuwe les
       tuinZichtbaar = false;
       tuin.classList.add("verborgen");
-      knop.textContent = "Toon tuin";
-      knop.classList.remove("zichtbaar-staat");
+      onthulKnop.textContent = "Toon tuin";
+      onthulKnop.classList.remove("zichtbaar-staat");
       return;
     }
 
-    leeg.classList.add("verborgen");
+    leegBericht.classList.add("verborgen");
     teller.textContent = boeketten.length + (boeketten.length === 1 ? " leerling" : " leerlingen");
-    if (!tuinZichtbaar) wacht.classList.remove("verborgen");
-    else wacht.classList.add("verborgen");
+
+    // Wacht-overlay tonen als tuin nog verborgen is
+    if (!tuinZichtbaar) {
+      wachtOverlay.classList.remove("verborgen");
+    } else {
+      wachtOverlay.classList.add("verborgen");
+    }
 
     const tellingen = {};
-    boeketten.forEach(b => b.bloemen.forEach(id => { tellingen[id] = (tellingen[id]||0)+1; }));
+    boeketten.forEach(b => b.bloemen.forEach(id => { tellingen[id] = (tellingen[id] || 0) + 1; }));
 
     Object.entries(tellingen).forEach(([id, aantal]) => {
-      const data = BLOEMEN_DATA[id];
-      if (!data) return;
+      if (!BLOEM_SVG[id]) return;
+      const basisX = POSITIES[id] || 50;
       const basisGrootte = GROOTTE_BASIS[id] || 110;
 
       for (let i = 0; i < aantal; i++) {
-        const jitter = (Math.random()-0.5) * 5;
+        const jitter = (Math.random() - 0.5) * 5;
         const schaal = 1 + Math.min(aantal * 0.12, 0.8);
         const hoogte = Math.round(basisGrootte * schaal);
-        const breedte = Math.round(hoogte * 0.83);
+        const breedte = Math.round(hoogte * (100 / 120));
 
         const bloem = document.createElement("div");
         bloem.classList.add("tuin-bloem");
-        bloem.style.left = (data.x + jitter) + "%";
+        bloem.style.left = (basisX + jitter) + "%";
         bloem.style.animationDelay = (Math.random() * 0.6) + "s";
 
+        // Hover-label met emotienaam
         const label = document.createElement("div");
         label.classList.add("bloem-label");
-        label.textContent = data.naam;
+        label.textContent = BLOEM_NAMEN[id] || id;
 
         const svgWrap = document.createElement("div");
         svgWrap.classList.add("tuin-bloem-svg");
         svgWrap.style.width = breedte + "px";
         svgWrap.style.height = hoogte + "px";
-        svgWrap.innerHTML = maakBloemSVG(data.vb, breedte, hoogte);
+        svgWrap.innerHTML = BLOEM_SVG[id];
 
         bloem.appendChild(label);
         bloem.appendChild(svgWrap);
@@ -185,28 +406,33 @@
     });
   }
 
+  // Tuin onthullen / verbergen
   window.toggleTuin = function() {
     const tuin = document.getElementById("tuin");
     const knop = document.getElementById("onthul-knop");
-    const wacht = document.getElementById("wacht-overlay");
+    const wachtOverlay = document.getElementById("wacht-overlay");
+
     tuinZichtbaar = !tuinZichtbaar;
+
     if (tuinZichtbaar) {
       tuin.classList.remove("verborgen");
-      wacht.classList.add("verborgen");
+      wachtOverlay.classList.add("verborgen");
       knop.textContent = "Verberg tuin";
       knop.classList.add("zichtbaar-staat");
     } else {
       tuin.classList.add("verborgen");
-      if (cache.length > 0) wacht.classList.remove("verborgen");
+      if (huidigeBoekettenCache.length > 0) wachtOverlay.classList.remove("verborgen");
       knop.textContent = "Toon tuin";
       knop.classList.remove("zichtbaar-staat");
     }
   };
 
   const boekettenRef = ref(db, "boeketten");
-  onValue(boekettenRef, snap => {
-    const data = snap.val();
-    tekenTuin(data ? Object.values(data) : []);
+
+  onValue(boekettenRef, (snapshot) => {
+    const data = snapshot.val();
+    const boeketten = data ? Object.values(data) : [];
+    tekenTuin(boeketten);
   });
 
   window.resetTuin = async function() {
@@ -214,7 +440,7 @@
     await remove(boekettenRef);
   };
 
-  window.addEventListener("resize", () => tekenTuin(cache));
+  window.addEventListener("resize", () => tekenTuin(huidigeBoekettenCache));
 </script>
 </body>
 </html>
