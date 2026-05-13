@@ -16,43 +16,31 @@
     .bolletje { width:13px; height:13px; border-radius:50%; border:2px solid var(--donker); background:transparent; transition:background 0.3s; }
     .bolletje.vol { background:var(--donker); }
     .teller-tekst { font-size:0.85rem; font-weight:500; color:#7A6A58; }
-
     .bloemen-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; padding:1.5rem; max-width:700px; margin:0 auto; }
     @media(max-width:480px){ .bloemen-grid{ grid-template-columns:repeat(2,1fr); } }
-
-    .bloem-kaart {
-      background:white; border:2px solid var(--zand); border-radius:16px;
-      padding:1.2rem 0.8rem 0.8rem; display:flex; flex-direction:column;
-      align-items:center; gap:0.4rem; cursor:pointer; user-select:none;
-      transition:transform 0.2s ease,border-color 0.2s,background 0.2s,box-shadow 0.2s;
-    }
+    .bloem-kaart { background:white; border:2px solid var(--zand); border-radius:16px; padding:1.4rem 0.8rem 1rem; display:flex; flex-direction:column; align-items:center; gap:0.6rem; cursor:pointer; user-select:none; transition:transform 0.2s ease,border-color 0.2s,background 0.2s,box-shadow 0.2s; }
     .bloem-kaart:hover { transform:translateY(-3px); box-shadow:0 6px 20px rgba(0,0,0,0.08); }
     .bloem-kaart.gekozen { border-color:var(--donker); background:var(--creme-2); transform:translateY(-4px) scale(1.03); box-shadow:0 8px 24px rgba(44,36,22,0.15); }
     .bloem-kaart.uitgedoofd { opacity:0.3; cursor:not-allowed; transform:none !important; box-shadow:none !important; }
-
-    /* De bloem is een SVG-element met viewBox crop */
-    .bloem-icoon {
-      width:80px; height:90px; display:block;
-      transition:transform 0.3s ease; overflow:hidden;
-    }
-    .bloem-kaart:not(.uitgedoofd):hover .bloem-icoon { transform:rotate(-5deg) scale(1.08); }
+    .bloem-icoon { width:72px; height:80px; display:block; transition:transform 0.3s ease; }
+    .bloem-icoon svg { width:100%; height:100%; }
+    .bloem-kaart:not(.uitgedoofd):hover .bloem-icoon { transform:rotate(-6deg) scale(1.1); }
     .bloem-kaart.gekozen .bloem-icoon { animation:schommel 0.4s ease; }
-    @keyframes schommel { 0%{transform:rotate(0)} 25%{transform:rotate(-10deg) scale(1.1)} 75%{transform:rotate(7deg) scale(1.1)} 100%{transform:rotate(0) scale(1)} }
-
+    @keyframes schommel { 0%{transform:rotate(0)} 25%{transform:rotate(-10deg) scale(1.12)} 75%{transform:rotate(7deg) scale(1.12)} 100%{transform:rotate(0) scale(1)} }
     .bloem-naam { font-weight:600; font-size:0.68rem; letter-spacing:0.09em; text-transform:uppercase; text-align:center; }
     .vinkje { display:none; width:22px; height:22px; background:var(--donker); border-radius:50%; align-items:center; justify-content:center; color:white; font-size:0.7rem; font-weight:bold; }
     .bloem-kaart.gekozen .vinkje { display:flex; animation:verschijn 0.3s ease; }
     @keyframes verschijn { from{transform:scale(0)} to{transform:scale(1)} }
-
     .verstuur-balk { position:sticky; bottom:0; background:linear-gradient(to top,var(--creme) 80%,transparent); padding:1.2rem 1.5rem 1.5rem; display:flex; justify-content:center; }
     .verstuur-knop { background:var(--donker); color:var(--creme); font-family:'Fraunces',serif; font-style:italic; font-weight:300; font-size:1.2rem; padding:1rem 3rem; border:none; border-radius:100px; cursor:pointer; transition:background 0.2s,transform 0.2s; opacity:0.3; pointer-events:none; }
     .verstuur-knop.actief { opacity:1; pointer-events:auto; }
     .verstuur-knop.actief:hover { background:var(--accent); transform:scale(1.03); }
-
+    .verstuur-knop.bezig { opacity:0.6; pointer-events:none; }
     .bevestiging { display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; min-height:70vh; padding:2rem; gap:1.5rem; }
     .bevestiging.zichtbaar { display:flex; }
     .bevestiging-bloemen { display:flex; gap:1.2rem; }
-    .bevestiging-bloemen .b-wrap { width:70px; height:80px; overflow:hidden; }
+    .bevestiging-bloemen .b-svg { width:64px; height:72px; }
+    .bevestiging-bloemen .b-svg svg { width:100%; height:100%; }
     .bevestiging h2 { font-family:'Fraunces',serif; font-weight:700; font-size:2rem; }
     .bevestiging p { font-size:1rem; color:#7A6A58; max-width:260px; }
   </style>
@@ -82,10 +70,15 @@
   <p>Je keuzes zijn aan de tuin toegevoegd. Kijk straks samen op het digibord!</p>
 </div>
 
+<!-- Firebase SDK laden via CDN (geen installatie nodig) -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, push, ref } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
+  // =============================================
+  //  FIREBASE CONFIGURATIE
+  //  Deze gegevens komen uit jouw Firebase project.
+  // =============================================
   const firebaseConfig = {
     apiKey: "AIzaSyAWDc4-qCewKSf3uKtrwyuav4z5wx8mIKw",
     authDomain: "oogst-emotions.firebaseapp.com",
@@ -100,52 +93,162 @@
   const db = getDatabase(app);
 
   // =============================================
-  //  BLOEMEN — elke bloem heeft een viewBox crop
-  //  die precies die bloem uit bloemen.svg uitknipt.
-  //  De coördinaten komen uit het Illustrator-bestand
-  //  (612x760 canvas, bloemen op rij/kolom posities).
-  //
-  //  Bloem 1 (Blijdschap): centrum ~(78,149), rij 1 kolom 1
-  //  Bloem 2 (Enthousiasme): translate(255,80) + centrum ~(-25+255, 70+80) = (230,150)
-  //  Bloem 3 (Trots): translate(425,80) centrum ~(425,155)
-  //  Bloem 4 (Rust): translate(595,80) centrum ~(595,130)
-  //  Bloem 5 (Opluchting): translate(85,280) centrum ~(85,330)
-  //  Bloem 6 (Tevredenheid): translate(255,280) centrum ~(255,330)
-  //  Bloem 7 (Stress): translate(425,280) centrum ~(425,320)
-  //  Bloem 8 (Onzekerheid): translate(595,280) centrum ~(595,330)
-  //  Bloem 9 (Overweldiging): translate(85,480) centrum ~(85,530)
-  //  Bloem 10 (Verdriet): translate(255,480) centrum ~(255,510)
-  //  Bloem 11 (Eenzaamheid): translate(425,480) centrum ~(425,510)
-  //  Bloem 12 (Boosheid): translate(595,480) centrum ~(595,510)
+  //  SVG BLOEMEN
   // =============================================
+  const BLOEM_SVG = {
+    blijdschap: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="38" cy="100" rx="7" ry="14" fill="#5A8A3A" transform="rotate(-30 38 100)"/>
+      <path d="M50,115 Q48,95 50,70" stroke="#5A8A3A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="50" cy="46" rx="8" ry="19" fill="#F5C030" transform="rotate(0 50 46)"/>
+      <ellipse cx="50" cy="46" rx="8" ry="19" fill="#F5C030" transform="rotate(30 50 46)"/>
+      <ellipse cx="50" cy="46" rx="8" ry="19" fill="#F5C030" transform="rotate(60 50 46)"/>
+      <ellipse cx="50" cy="46" rx="8" ry="19" fill="#F5C030" transform="rotate(90 50 46)"/>
+      <ellipse cx="50" cy="46" rx="8" ry="19" fill="#EBA820" transform="rotate(120 50 46)"/>
+      <ellipse cx="50" cy="46" rx="8" ry="19" fill="#EBA820" transform="rotate(150 50 46)"/>
+      <circle cx="50" cy="46" r="15" fill="#7B4A1E"/>
+      <circle cx="50" cy="46" r="8" fill="#4A2A08"/>
+    </svg>`,
+    stress: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q52,95 50,68" stroke="#5A8A3A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="37" cy="100" rx="6" ry="13" fill="#5A8A3A" transform="rotate(25 37 100)"/>
+      <polygon points="50,16 55,40 70,25 59,46 78,44 61,56 78,63 59,66 68,84 52,72 52,90 50,74 48,90 48,72 32,84 41,66 22,63 39,56 22,44 41,46 30,25 45,40" fill="#CC2828"/>
+      <polygon points="50,26 54,43 66,32 57,49 72,47 59,57 72,63 57,66 64,80 51,70 51,85 50,71 49,85 49,70 36,80 43,66 28,63 41,57 28,47 43,49 34,32 46,43" fill="#E84040"/>
+      <circle cx="50" cy="54" r="12" fill="#B81818"/>
+      <circle cx="50" cy="54" r="6" fill="#881010"/>
+    </svg>`,
+    enthousiasme: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q47,95 50,68" stroke="#5A8A3A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="64" cy="100" rx="6" ry="13" fill="#5A8A3A" transform="rotate(-25 64 100)"/>
+      <polygon points="50,12 56,34 71,18 60,40 80,36 64,50 82,56 63,60 74,76 56,68 56,88 50,71 44,88 44,68 26,76 37,60 18,56 36,50 20,36 40,40 29,18 44,34" fill="#F07020"/>
+      <polygon points="50,22 55,38 66,26 58,44 74,41 61,52 76,57 60,60 69,73 54,66 54,83 50,69 46,83 46,66 31,73 40,60 24,57 39,52 26,41 42,44 34,26 45,38" fill="#F8924A"/>
+      <circle cx="50" cy="52" r="13" fill="#E05510"/>
+      <circle cx="50" cy="52" r="6" fill="#B03A08"/>
+    </svg>`,
+    onzekerheid: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q50,96 50,76" stroke="#5A8A3A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="36" cy="101" rx="6" ry="13" fill="#5A8A3A" transform="rotate(20 36 101)"/>
+      <ellipse cx="50" cy="50" rx="11" ry="24" fill="#7AABBF"/>
+      <ellipse cx="43" cy="55" rx="6" ry="19" fill="#9ACCD8" opacity="0.6"/>
+      <ellipse cx="50" cy="30" rx="9" ry="12" fill="#5A9AB0"/>
+      <ellipse cx="57" cy="36" rx="5" ry="8" fill="#9ACCD8" opacity="0.5"/>
+    </svg>`,
+    trots: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q53,96 50,72" stroke="#5A8A3A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="64" cy="100" rx="6" ry="13" fill="#5A8A3A" transform="rotate(-20 64 100)"/>
+      <ellipse cx="50" cy="50" rx="21" ry="26" fill="#A060C0"/>
+      <ellipse cx="50" cy="50" rx="17" ry="21" fill="#B878D0"/>
+      <ellipse cx="41" cy="44" rx="12" ry="16" fill="#CC90E0" opacity="0.85"/>
+      <ellipse cx="59" cy="44" rx="12" ry="16" fill="#CC90E0" opacity="0.85"/>
+      <ellipse cx="50" cy="39" rx="10" ry="12" fill="#DCA8EC"/>
+      <circle cx="50" cy="52" r="7" fill="#7830A8"/>
+      <circle cx="50" cy="52" r="3" fill="#5010A0"/>
+    </svg>`,
+    overweldiging: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q48,96 50,72" stroke="#5A8A3A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="36" cy="100" rx="6" ry="13" fill="#5A8A3A" transform="rotate(25 36 100)"/>
+      <ellipse cx="50" cy="52" rx="7" ry="21" fill="#7840B8" transform="rotate(0 50 52)"/>
+      <ellipse cx="50" cy="52" rx="7" ry="21" fill="#8A52C8" transform="rotate(20 50 52)"/>
+      <ellipse cx="50" cy="52" rx="7" ry="21" fill="#7840B8" transform="rotate(40 50 52)"/>
+      <ellipse cx="50" cy="52" rx="7" ry="21" fill="#9A64D8" transform="rotate(60 50 52)"/>
+      <ellipse cx="50" cy="52" rx="7" ry="21" fill="#8A52C8" transform="rotate(80 50 52)"/>
+      <ellipse cx="50" cy="52" rx="7" ry="21" fill="#AA76E4" transform="rotate(100 50 52)"/>
+      <ellipse cx="50" cy="52" rx="7" ry="21" fill="#7840B8" transform="rotate(120 50 52)"/>
+      <ellipse cx="50" cy="52" rx="7" ry="21" fill="#9A64D8" transform="rotate(140 50 52)"/>
+      <ellipse cx="50" cy="52" rx="7" ry="21" fill="#8A52C8" transform="rotate(160 50 52)"/>
+      <circle cx="50" cy="52" r="10" fill="#5020A0"/>
+      <circle cx="50" cy="52" r="5" fill="#380A78"/>
+    </svg>`,
+    rust: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q53,96 50,72" stroke="#5A8A3A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="64" cy="100" rx="6" ry="13" fill="#5A8A3A" transform="rotate(-30 64 100)"/>
+      <ellipse cx="50" cy="34" rx="15" ry="20" fill="#7FC88A" opacity="0.95"/>
+      <ellipse cx="69" cy="52" rx="15" ry="20" fill="#6DB87A" opacity="0.95" transform="rotate(90 69 52)"/>
+      <ellipse cx="50" cy="70" rx="15" ry="20" fill="#7FC88A" opacity="0.95" transform="rotate(180 50 70)"/>
+      <ellipse cx="31" cy="52" rx="15" ry="20" fill="#6DB87A" opacity="0.95" transform="rotate(270 31 52)"/>
+      <circle cx="50" cy="52" r="10" fill="#3A7840"/>
+      <circle cx="50" cy="52" r="5" fill="#2A5C30"/>
+    </svg>`,
+    verdriet: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q43,97 45,76" stroke="#5A8A3A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="34" cy="103" rx="6" ry="12" fill="#5A8A3A" transform="rotate(15 34 103)"/>
+      <ellipse cx="45" cy="57" rx="10" ry="22" fill="#6090C0" transform="rotate(-18 45 57)"/>
+      <ellipse cx="45" cy="57" rx="10" ry="22" fill="#6090C0" transform="rotate(18 45 57)"/>
+      <ellipse cx="45" cy="57" rx="10" ry="22" fill="#7AAAD0" transform="rotate(44 45 57)"/>
+      <ellipse cx="45" cy="57" rx="10" ry="22" fill="#7AAAD0" transform="rotate(68 45 57)"/>
+      <ellipse cx="45" cy="57" rx="10" ry="22" fill="#8AB8D8" transform="rotate(-44 45 57)"/>
+      <ellipse cx="45" cy="57" rx="10" ry="22" fill="#8AB8D8" transform="rotate(-68 45 57)"/>
+      <circle cx="45" cy="57" r="10" fill="#4070A8"/>
+      <circle cx="45" cy="57" r="5" fill="#2A5080"/>
+    </svg>`,
+    opluchting: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q47,96 50,70" stroke="#5A8A3A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="36" cy="101" rx="6" ry="12" fill="#5A8A3A" transform="rotate(25 36 101)"/>
+      <ellipse cx="50" cy="50" rx="6" ry="23" fill="#F0D840" transform="rotate(0 50 50)"/>
+      <ellipse cx="50" cy="50" rx="6" ry="23" fill="#F4E060" transform="rotate(26 50 50)"/>
+      <ellipse cx="50" cy="50" rx="6" ry="23" fill="#F0D840" transform="rotate(52 50 50)"/>
+      <ellipse cx="50" cy="50" rx="6" ry="23" fill="#F4E060" transform="rotate(78 50 50)"/>
+      <ellipse cx="50" cy="50" rx="6" ry="23" fill="#F0D840" transform="rotate(104 50 50)"/>
+      <ellipse cx="50" cy="50" rx="6" ry="23" fill="#F4E060" transform="rotate(130 50 50)"/>
+      <ellipse cx="50" cy="50" rx="6" ry="23" fill="#F0D840" transform="rotate(156 50 50)"/>
+      <circle cx="50" cy="50" r="12" fill="#D4A820"/>
+      <circle cx="50" cy="50" r="6" fill="#A87010"/>
+    </svg>`,
+    eenzaamheid: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q54,97 52,76" stroke="#8A7050" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="64" cy="103" rx="6" ry="11" fill="#8A7050" transform="rotate(-20 64 103)"/>
+      <ellipse cx="52" cy="52" rx="8" ry="23" fill="#C09050" transform="rotate(-22 52 52)"/>
+      <ellipse cx="52" cy="52" rx="8" ry="23" fill="#B08040" transform="rotate(22 52 52)"/>
+      <ellipse cx="52" cy="52" rx="8" ry="23" fill="#C09050" transform="rotate(-52 52 52)"/>
+      <ellipse cx="52" cy="52" rx="8" ry="23" fill="#B08040" transform="rotate(52 52 52)"/>
+      <ellipse cx="52" cy="52" rx="8" ry="23" fill="#A87040" transform="rotate(82 52 52)"/>
+      <ellipse cx="52" cy="52" rx="8" ry="23" fill="#A87040" transform="rotate(-82 52 52)"/>
+      <circle cx="52" cy="52" r="11" fill="#8A5A28"/>
+      <circle cx="52" cy="52" r="5" fill="#6A4018"/>
+    </svg>`,
+    tevredenheid: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q53,96 50,72" stroke="#5A8A3A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="64" cy="100" rx="6" ry="13" fill="#5A8A3A" transform="rotate(-25 64 100)"/>
+      <ellipse cx="50" cy="52" rx="12" ry="23" fill="#5A9A5A" transform="rotate(0 50 52)"/>
+      <ellipse cx="50" cy="52" rx="12" ry="23" fill="#4A8A4A" transform="rotate(60 50 52)"/>
+      <ellipse cx="50" cy="52" rx="12" ry="23" fill="#5A9A5A" transform="rotate(120 50 52)"/>
+      <ellipse cx="50" cy="52" rx="12" ry="23" fill="#4A8A4A" transform="rotate(180 50 52)"/>
+      <ellipse cx="50" cy="52" rx="12" ry="23" fill="#6AAA6A" transform="rotate(240 50 52)"/>
+      <ellipse cx="50" cy="52" rx="12" ry="23" fill="#4A8A4A" transform="rotate(300 50 52)"/>
+      <circle cx="50" cy="52" r="10" fill="#2A6A2A"/>
+      <circle cx="50" cy="52" r="5" fill="#1A4A1A"/>
+    </svg>`,
+    boosheid: `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50,115 Q47,96 50,72" stroke="#4A7030" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <polygon points="42,106 35,98 44,96" fill="#4A7030"/>
+      <ellipse cx="64" cy="100" rx="6" ry="11" fill="#4A7030" transform="rotate(-25 64 100)"/>
+      <ellipse cx="50" cy="52" rx="19" ry="14" fill="#B82020"/>
+      <ellipse cx="42" cy="46" rx="14" ry="12" fill="#C83030" transform="rotate(-15 42 46)"/>
+      <ellipse cx="58" cy="46" rx="14" ry="12" fill="#C83030" transform="rotate(15 58 46)"/>
+      <ellipse cx="50" cy="39" rx="12" ry="10" fill="#D84040"/>
+      <ellipse cx="42" cy="35" rx="9" ry="8" fill="#E05050" transform="rotate(-10 42 35)"/>
+      <ellipse cx="58" cy="35" rx="9" ry="8" fill="#E05050" transform="rotate(10 58 35)"/>
+      <ellipse cx="50" cy="32" rx="7" ry="6" fill="#E86060"/>
+      <circle cx="50" cy="36" r="5" fill="#C01010"/>
+    </svg>`,
+  };
 
-  const SVG_SRC = "bloemen.svg";
-
-  // viewBox per bloem: "x y breedte hoogte" — crop uit het 612x760 canvas
   const BLOEMEN = [
-    { id:"blijdschap",    naam:"Blijdschap",    vb:"28 80 105 155"   },
-    { id:"enthousiasme",  naam:"Enthousiasme",  vb:"198 80 115 155"  },
-    { id:"trots",         naam:"Trots",         vb:"368 50 115 160"  },
-    { id:"rust",          naam:"Rust",          vb:"535 45 115 165"  },
-    { id:"opluchting",    naam:"Opluchting",    vb:"28 255 115 155"  },
-    { id:"tevredenheid",  naam:"Tevredenheid",  vb:"198 255 115 155" },
-    { id:"stress",        naam:"Stress",        vb:"368 245 115 160" },
-    { id:"onzekerheid",   naam:"Onzekerheid",   vb:"535 255 115 155" },
-    { id:"overweldiging", naam:"Overweldiging", vb:"28 450 115 155"  },
-    { id:"verdriet",      naam:"Verdriet",      vb:"198 440 115 155" },
-    { id:"eenzaamheid",   naam:"Eenzaamheid",   vb:"368 445 115 155" },
-    { id:"boosheid",      naam:"Boosheid",      vb:"535 445 115 155" },
+    { id:"blijdschap",    naam:"Blijdschap"    },
+    { id:"stress",        naam:"Stress"        },
+    { id:"enthousiasme",  naam:"Enthousiasme"  },
+    { id:"onzekerheid",   naam:"Onzekerheid"   },
+    { id:"trots",         naam:"Trots"         },
+    { id:"overweldiging", naam:"Overweldiging" },
+    { id:"rust",          naam:"Rust"          },
+    { id:"verdriet",      naam:"Verdriet"      },
+    { id:"opluchting",    naam:"Opluchting"    },
+    { id:"eenzaamheid",   naam:"Eenzaamheid"   },
+    { id:"tevredenheid",  naam:"Tevredenheid"  },
+    { id:"boosheid",      naam:"Boosheid"      },
   ];
 
   let gekozen = new Set();
   const MAX = 3;
-
-  function maakBloemSVG(vb) {
-    // Inline SVG die bloemen.svg inlaadt met de juiste viewBox-crop
-    return `<svg viewBox="${vb}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="100%">
-      <image href="${SVG_SRC}" x="0" y="0" width="612" height="760"/>
-    </svg>`;
-  }
 
   function renderBloemen() {
     const grid = document.getElementById("bloemen-grid");
@@ -156,7 +259,7 @@
       kaart.id = "kaart-" + b.id;
       kaart.innerHTML = `
         <div class="vinkje">✓</div>
-        <div class="bloem-icoon">${maakBloemSVG(b.vb)}</div>
+        <div class="bloem-icoon">${BLOEM_SVG[b.id]}</div>
         <div class="bloem-naam">${b.naam}</div>
       `;
       kaart.addEventListener("click", () => toggleBloem(b.id));
@@ -182,15 +285,30 @@
     document.getElementById("verstuur-knop").classList.toggle("actief", n === MAX);
   }
 
+  // =============================================
+  //  BOEKET VERSTUREN NAAR FIREBASE
+  //  push() maakt automatisch een unieke sleutel
+  //  aan voor elke inzending — zo overschrijven
+  //  leerlingen elkaars data niet.
+  // =============================================
   window.verstuurBoeket = async function() {
     if (gekozen.size < MAX) return;
+
     const knop = document.getElementById("verstuur-knop");
-    knop.textContent = "Versturen…"; knop.style.opacity = "0.6"; knop.style.pointerEvents = "none";
+    knop.classList.add("bezig");
+    knop.textContent = "Versturen…";
+
     try {
-      await push(ref(db, "boeketten"), { tijdstip: Date.now(), bloemen: Array.from(gekozen) });
+      await push(ref(db, "boeketten"), {
+        tijdstip: Date.now(),
+        bloemen: Array.from(gekozen)
+      });
       toonBevestiging();
-    } catch(e) {
-      knop.textContent = "Probeer opnieuw"; knop.style.opacity = "1"; knop.style.pointerEvents = "auto";
+    } catch (fout) {
+      console.error("Fout bij versturen:", fout);
+      knop.classList.remove("bezig");
+      knop.classList.add("actief");
+      knop.textContent = "Probeer opnieuw";
     }
   };
 
@@ -199,10 +317,9 @@
     document.getElementById("bevestiging").classList.add("zichtbaar");
     const container = document.getElementById("bevestiging-bloemen");
     gekozen.forEach(id => {
-      const b = BLOEMEN.find(x => x.id === id);
       const wrap = document.createElement("div");
-      wrap.classList.add("b-wrap");
-      wrap.innerHTML = maakBloemSVG(b.vb);
+      wrap.classList.add("b-svg");
+      wrap.innerHTML = BLOEM_SVG[id];
       container.appendChild(wrap);
     });
   }
